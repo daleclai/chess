@@ -42,7 +42,7 @@ public class ChessPiece {
      */
 
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return type;
     }
 
 
