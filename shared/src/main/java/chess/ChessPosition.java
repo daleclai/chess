@@ -22,7 +22,7 @@ public class ChessPosition {
      */
     public int getRow() {
         return row;
-
+    }
     /**
      * @return which column this position is in
      * 1 codes for the left row
