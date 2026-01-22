@@ -1,6 +1,8 @@
 package chess;
+import chess.moves_calc.*;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.List;
 
 /**
@@ -54,12 +56,44 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ChessPiece piece = board.getPiece(myPosition);
-        if (piece.getPieceType() == PieceType.BISHOP) {
-            return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1,8), null));
+
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+        return switch (type) {
+            case BISHOP -> bishop_calc.getMoves(board, position);
+            case KING -> king_calc.getMoves(board, position);
+            case KNIGHT -> knight_calc.getMoves(board, position);
+            case PAWN -> pawn_calc.getMoves(board, position);
+            case QUEEN -> queen_calc.getMoves(board, position);
+            case ROOK -> rook_calc.getMoves(board, position);
+        };
+    }
+    @Override
+    public String toString() {
+        return switch (type) {
+            case BISHOP -> pieceColor == ChessGame.TeamColor.WHITE ? "B" : "b";
+            case KING -> pieceColor == ChessGame.TeamColor.WHITE ? "K" : "k";
+            case KNIGHT -> pieceColor == ChessGame.TeamColor.WHITE ? "N" : "n";
+            case PAWN -> pieceColor == ChessGame.TeamColor.WHITE ? "P" : "p";
+            case QUEEN -> pieceColor == ChessGame.TeamColor.WHITE ? "Q" : "q";
+            case ROOK -> pieceColor == ChessGame.TeamColor.WHITE ? "R" : "r";
+        };
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
         }
-        return List.of();
+        if (o==null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return pieceColor == that.pieceColor && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
     }
 
 }

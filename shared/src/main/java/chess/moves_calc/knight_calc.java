@@ -8,7 +8,7 @@ import chess.ChessPosition;
 import java.util.HashSet;
 
 public class knight_calc {
-    public static HashSet<ChessMove> getMove(ChessBoard board, ChessPosition currentPosition) {
+    public static HashSet<ChessMove> getMoves(ChessBoard board, ChessPosition currentPosition) {
         int[][] rel_Moves = {
                 {2,1},
                 {-2,1},
