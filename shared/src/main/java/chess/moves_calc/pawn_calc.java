@@ -33,13 +33,17 @@ public class pawn_calc {
                 moves.add(new ChessMove(currentPosition, rightAtk, promoPiece));
             }
             // double forward //
-            ChessPosition doubleForward = new ChessPosition(current_y + moveIncrement*2, current_x);
+            ChessPosition oneForward = new ChessPosition(current_y + moveIncrement, current_x);
+            ChessPosition doubleForward = new ChessPosition(current_y + moveIncrement * 2, current_x);
+
             if (MovesCalc.isValidSquare(doubleForward) &&
-                ((pieceColor == ChessGame.TeamColor.WHITE && current_y == 2) ||
-                (pieceColor == ChessGame.TeamColor.BLACK && current_y == 7)) &&
-                board.getPiece(doubleForward) == null && board.getPieceTeam(doubleForward) == pieceColor) {
-                    moves.add(new ChessMove(currentPosition, doubleForward, null));
+                    ((pieceColor == ChessGame.TeamColor.WHITE && current_y == 2) ||
+                            (pieceColor == ChessGame.TeamColor.BLACK && current_y == 7)) &&
+                    board.getPiece(oneForward) == null &&
+                    board.getPiece(doubleForward) == null) {
+                moves.add(new ChessMove(currentPosition, doubleForward, null));
             }
+
 
         }
         return moves;
