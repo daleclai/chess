@@ -10,9 +10,9 @@ public class pawn_calc {
         int current_x = currentPosition.getColumn();
         int current_y = currentPosition.getRow();
         ChessPiece.PieceType[] promoPieces = new ChessPiece.PieceType[]{null};
-        ChessGame.TeamColor color_team = board.getPieceTeam(currentPosition);
-        int moveIncrement = color_team == ChessGame.TeamColor.WHITE ? 1 : -1;
-        boolean promote = (color_team == ChessGame.TeamColor.WHITE && current_y == 7) || (color_team == ChessGame.TeamColor.BLACK && current_y == 2);
+        ChessGame.TeamColor pieceColor = board.getPieceTeam(currentPosition);
+        int moveIncrement = pieceColor == ChessGame.TeamColor.WHITE ? 1 : -1;
+        boolean promote = (pieceColor == ChessGame.TeamColor.WHITE && current_y == 7) || (pieceColor == ChessGame.TeamColor.BLACK && current_y == 2);
         if (promote) {
             promoPieces = new ChessPiece.PieceType[]{ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.QUEEN};
         }
@@ -24,20 +24,20 @@ public class pawn_calc {
             }
             //Left atk//
             ChessPosition leftAtk = new ChessPosition(current_y + moveIncrement, current_x-1);
-            if (MovesCalc.isValidSquare(leftAtk) && board.getPiece(leftAtk) != null && board.getPieceTeam(leftAtk) != color_team) {
+            if (MovesCalc.isValidSquare(leftAtk) && board.getPiece(leftAtk) != null && board.getPieceTeam(leftAtk) != pieceColor) {
                 moves.add(new ChessMove(currentPosition, leftAtk, promoPiece));
             }
             //right atk//
             ChessPosition rightAtk = new ChessPosition(current_y + moveIncrement, current_x+1);
-            if (MovesCalc.isValidSquare(rightAtk) && board.getPiece(rightAtk) != null && board.getPieceTeam(rightAtk) != color_team) {
+            if (MovesCalc.isValidSquare(rightAtk) && board.getPiece(rightAtk) != null && board.getPieceTeam(rightAtk) != pieceColor) {
                 moves.add(new ChessMove(currentPosition, rightAtk, promoPiece));
             }
             // double forward //
             ChessPosition doubleForward = new ChessPosition(current_y + moveIncrement*2, current_x);
             if (MovesCalc.isValidSquare(doubleForward) &&
-                ((color_team == ChessGame.TeamColor.WHITE && current_y == 2) ||
-                (color_team == ChessGame.TeamColor.BLACK && current_y == 7)) &&
-                board.getPiece(doubleForward) == null && board.getPieceTeam(doubleForward) == color_team) {
+                ((pieceColor == ChessGame.TeamColor.WHITE && current_y == 2) ||
+                (pieceColor == ChessGame.TeamColor.BLACK && current_y == 7)) &&
+                board.getPiece(doubleForward) == null && board.getPieceTeam(doubleForward) == pieceColor) {
                     moves.add(new ChessMove(currentPosition, doubleForward, null));
             }
 
