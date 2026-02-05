@@ -65,18 +65,21 @@ public class ChessGame {
         Collection<ChessMove> valid = new HashSet<>();
         for (ChessMove move : possible) {
             ChessPiece captured = board.getPiece(move.getEndPosition());
+            ChessPiece original = current;
+            ChessPiece simulated = original;
+
             if (move.getPromotionPiece() != null) {
-                current = new ChessPiece(current.getTeamColor(), move.getPromotionPiece());
+                simulated = new ChessPiece(current.getTeamColor(), move.getPromotionPiece());
             }
             board.addPiece(startPosition, null);
-            board.addPiece(move.getEndPosition(), current);
+            board.addPiece(move.getEndPosition(), simulated);
 
             if (!isInCheck(current.getTeamColor())) {
                 valid.add(move);
             }
 
             board.addPiece(move.getEndPosition(), captured);
-            board.addPiece(startPosition, current);
+            board.addPiece(startPosition, original);
         }
         return valid;
     }
@@ -90,9 +93,12 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece piece = board.getPiece(move.getStartPosition());
 
-        ChessPiece moved = piece;
-        if (move.getPromotionPiece() != null) {
-            moved = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
+        if (piece == null) {
+            throw new InvalidMoveException("No piece at start position");
+        }
+
+        if (piece.getTeamColor() != getTeamTurn()) {
+            throw new InvalidMoveException("Not your turn");
         }
 
         Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
@@ -100,12 +106,9 @@ public class ChessGame {
             throw new InvalidMoveException("Invalid move");
         }
 
-        if (piece == null) {
-            throw new InvalidMoveException("No piece at start position");
-        }
-
-        if (piece.getTeamColor() != getTeamTurn()) {
-            throw new InvalidMoveException("Not your turn");
+        ChessPiece moved = piece;
+        if (move.getPromotionPiece() != null) {
+            moved = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
         }
 
         ChessPiece captured = board.getPiece(move.getEndPosition());
@@ -115,7 +118,7 @@ public class ChessGame {
 
         if (isInCheck(piece.getTeamColor())) {
             board.addPiece(move.getStartPosition(), piece);
-            board.addPiece(move.getEndPosition(), moved);
+            board.addPiece(move.getEndPosition(), captured);
             throw new InvalidMoveException("King is in check");
         }
 
@@ -165,7 +168,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        if (!isInCheckmate(teamColor)) return false;
+        if (!isInCheck(teamColor)) return false;
 
         for (int y=1; y<=8; y++) {
             for (int x=1; x<= 8; x++) {
@@ -188,7 +191,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        if (isInCheckmate(teamColor)) return false;
+        if (isInCheck(teamColor)) return false;
 
         for (int y=1; y<=8; y++) {
             for (int x=1; x<=8; x++) {
