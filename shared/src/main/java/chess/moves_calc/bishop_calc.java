@@ -15,7 +15,8 @@ public class bishop_calc {
                 {1,1},
                 {-1,1},
                 {1,-1},
-                {-1,-1}};
+                {-1,-1}
+        };
         ChessGame.TeamColor pieceColor = board.getPieceTeam(currentPosition);
         return MovesCalc.makeDirection(board, currentPosition, directions, current_y, current_x, pieceColor);
     }
