@@ -88,7 +88,42 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+
+        ChessPiece moved = piece;
+        if (move.getPromotionPiece() != null) {
+            moved = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
+        }
+
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
+        if (validMoves == null || !validMoves.contains(move)) {
+            throw new InvalidMoveException("Invalid move");
+        }
+
+        if (piece == null) {
+            throw new InvalidMoveException("No piece at start position");
+        }
+
+        if (piece.getTeamColor() != getTeamTurn()) {
+            throw new InvalidMoveException("Not your turn");
+        }
+
+        ChessPiece captured = board.getPiece(move.getEndPosition());
+
+        board.addPiece(move.getStartPosition(), null);
+        board.addPiece(move.getEndPosition(), moved);
+
+        if (isInCheck(piece.getTeamColor())) {
+            board.addPiece(move.getStartPosition(), piece);
+            board.addPiece(move.getEndPosition(), moved);
+            throw new InvalidMoveException("King is in check");
+        }
+
+        setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
+
+        if (isInCheckmate(getTeamTurn()) || isInStalemate(getTeamTurn())) {
+            game_over = true;
+        }
     }
 
     /**
