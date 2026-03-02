@@ -1,11 +1,6 @@
+// shared/src/main/java/model/GameData.java
 package model;
 
 import chess.ChessGame;
 
-public record GameData(
-        int gameID,
-        String whiteUsername,
-        String blackUsername,
-        String gameName,
-        ChessGame game
-) {}
+public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {}
