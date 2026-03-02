@@ -1,63 +1,99 @@
 package service;
 
-import dataaccess.*;
-import model.*;
+import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
+import model.GameData;
+import model.AuthData;
+import service.request.CreateGameRequest;
+import service.request.JoinGameRequest;
+import service.result.CreateGameResult;
+import service.result.ListGameResult;
+
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class GameService {
+
     private final DataAccess dataAccess;
+
     public GameService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
 
-    // list games
-    public ListGames listGames(String authToken) throws DataAccessException {
+    // LIST GAMES
+    public ListGameResult listGames(String authToken) throws DataAccessException {
+
         if (authToken == null || dataAccess.getAuth(authToken) == null) {
             throw new DataAccessException("Error: unauthorized");
         }
+
         Collection<GameData> games = dataAccess.listGames();
-        return new ListGames(games);
+        return new ListGameResult(new ArrayList<>(games));
     }
 
-    //create game
-    public CreateResult createGame(String authToken, CreateReq request) throws DataAccessException {
+    // CREATE GAME
+    public CreateGameResult createGame(String authToken, CreateGameRequest request)
+            throws DataAccessException {
+
         if (authToken == null || dataAccess.getAuth(authToken) == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        if (request.name() == null) {
+
+        if (request.getGameName() == null) {
             throw new DataAccessException("Error: bad request");
         }
-        int ID = dataAccess.createGame(request.name());
-        return new CreateResult(ID);
+
+        int gameID = dataAccess.createGame(request.getGameName());
+
+        return new CreateGameResult(gameID);
     }
 
-    //join
-    public void joinGame(String authToken, JoinReq request) throws DataAccessException {
+    // JOIN GAME
+    public void joinGame(String authToken, JoinGameRequest request)
+            throws DataAccessException {
+
         AuthData auth = dataAccess.getAuth(authToken);
         if (auth == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        GameData game = dataAccess.getGame(request.ID());
-        if (game==null) {
+
+        GameData game = dataAccess.getGame(request.getGameID());
+        if (game == null) {
             throw new DataAccessException("Error: bad request");
         }
-        String username = auth.username();
 
-        if (request.color().equals("WHITE")) {
+        String username = auth.username();  // ✅ record style
+
+        if (request.getPlayerColor().equals("WHITE")) {
+
             if (game.whiteUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            game = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
 
-        } else if (request.color().equals("BLACK")) {
+            game = new GameData(
+                    game.gameID(),
+                    username,
+                    game.blackUsername(),
+                    game.gameName(),
+                    game.game());
+
+        } else if (request.getPlayerColor().equals("BLACK")) {
+
             if (game.blackUsername() != null) {
                 throw new DataAccessException("Error: already taken");
             }
-            game = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
+
+            game = new GameData(
+                    game.gameID(),
+                    game.whiteUsername(),
+                    username,
+                    game.gameName(),
+                    game.game());
+
         } else {
             throw new DataAccessException("Error: bad request");
         }
+
         dataAccess.updateGame(game);
     }
-
 }

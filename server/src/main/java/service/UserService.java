@@ -2,10 +2,12 @@ package service;
 
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import model.AuthData;
 import model.UserData;
+import service.request.LoginRequest;
 import service.request.RegRequest;
+import service.result.AuthData;
 import service.result.RegResult;
+
 import java.util.UUID;
 
 public class UserService {
@@ -17,19 +19,42 @@ public class UserService {
     }
 
     public RegResult register(RegRequest request) throws DataAccessException {
-        if (request.username() == null || request.password() == null || request.email() == null) {
+
+        if (request.getUsername() == null ||
+                request.getPassword() == null ||
+                request.getEmail() == null) {
             throw new DataAccessException("Error: bad request");
         }
-        if (dataAccess.getUser(request.username()) != null) {
+
+        if (dataAccess.getUser(request.getUsername()) != null) {
             throw new DataAccessException("Error: already taken");
         }
 
-        UserData user = new UserData(request.username(), request.password(), request.email());
+        UserData user = new UserData(
+                request.getUsername(),
+                request.getPassword(),
+                request.getEmail());
+
         dataAccess.createUser(user);
 
         String token = UUID.randomUUID().toString();
-        dataAccess.createAuth(new AuthData(token, request.username()));
+        dataAccess.createAuth(new model.AuthData(token, request.getUsername()));
 
-        return new RegResult(request.username(), token);
+        return new RegResult(request.getUsername(), token);
+    }
+
+    public AuthData login(LoginRequest request) throws DataAccessException {
+
+        UserData user = dataAccess.getUser(request.getUsername());
+
+        if (user == null ||
+                !user.password().equals(request.getPassword())) {
+            throw new DataAccessException("Error: unauthorized");
+        }
+
+        String token = UUID.randomUUID().toString();
+        dataAccess.createAuth(new model.AuthData(token, request.getUsername()));
+
+        return new AuthData(token, request.getUsername());
     }
 }
