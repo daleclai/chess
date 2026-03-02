@@ -20,7 +20,7 @@ public class GameService {
         this.dataAccess = dataAccess;
     }
 
-    // LIST GAMES
+    //list
     public ListGameResult listGames(String authToken) throws DataAccessException {
 
         if (authToken == null || dataAccess.getAuth(authToken) == null) {
@@ -31,7 +31,7 @@ public class GameService {
         return new ListGameResult(new ArrayList<>(games));
     }
 
-    // CREATE GAME
+    // create
     public CreateGameResult createGame(String authToken, CreateGameRequest request)
             throws DataAccessException {
 
@@ -48,7 +48,7 @@ public class GameService {
         return new CreateGameResult(gameID);
     }
 
-    // JOIN GAME
+
     public void joinGame(String authToken, JoinGameRequest request)
             throws DataAccessException {
 
@@ -62,7 +62,7 @@ public class GameService {
             throw new DataAccessException("Error: bad request");
         }
 
-        String username = auth.username();  // ✅ record style
+        String username = auth.username();
 
         if (request.getPlayerColor().equals("WHITE")) {
 

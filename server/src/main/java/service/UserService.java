@@ -6,6 +6,7 @@ import model.UserData;
 import service.request.LoginRequest;
 import service.request.RegRequest;
 import service.result.AuthData;
+import service.result.LogoutResult;
 import service.result.RegResult;
 
 import java.util.UUID;
@@ -56,5 +57,14 @@ public class UserService {
         dataAccess.createAuth(new model.AuthData(token, request.getUsername()));
 
         return new AuthData(token, request.getUsername());
+    }
+
+    public LogoutResult logout(String authToken) throws DataAccessException {
+        if (authToken == null || dataAccess.getAuth(authToken) == null) {
+            throw new DataAccessException("Invalid or missing auth token");
+        }
+
+        dataAccess.deleteAuth(authToken); // remove the token from DB
+        return new LogoutResult("Successfully logged out");
     }
 }
