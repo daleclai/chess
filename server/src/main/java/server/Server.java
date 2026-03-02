@@ -27,7 +27,7 @@ public class Server {
         javalin.post("/user/logout", new LogoutHandler(userService));
         javalin.post("/game", new CreateGameHandler(gameService));
         javalin.post("/game/join", new JoinGameHandler(gameService));
-
+        javalin.get("/games", new ListGamesHandler(gameService));
         javalin.delete("/db", ctx -> {
             dataAccess.clear();
             ctx.status(200);
