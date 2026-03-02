@@ -1,10 +1,7 @@
 package server;
 
 import io.javalin.Javalin;
-import server.handlers.CreateGameHandler;
-import server.handlers.LogoutHandler;
-import server.handlers.RegisterHandler;
-import server.handlers.LoginHandler;
+import server.handlers.*;
 import service.GameService;
 import service.UserService;
 import dataaccess.MemoryDataAccess;
@@ -29,6 +26,7 @@ public class Server {
         javalin.post("/session", new LoginHandler(userService));
         javalin.post("/user/logout", new LogoutHandler(userService));
         javalin.post("/game", new CreateGameHandler(gameService));
+        javalin.post("/game/join", new JoinGameHandler(gameService));
 
         javalin.delete("/db", ctx -> {
             dataAccess.clear();
