@@ -64,7 +64,7 @@ public class UserService {
             throw new DataAccessException("Invalid or missing auth token");
         }
 
-        dataAccess.deleteAuth(authToken); // remove the token from DB
+        dataAccess.deleteAuth(authToken);
         return new LogoutResult("Successfully logged out");
     }
 }

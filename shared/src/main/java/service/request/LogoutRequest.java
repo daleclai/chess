@@ -3,7 +3,7 @@ package service.request;
 public class LogoutRequest {
     private String authToken;
 
-    public LogoutRequest() {} // for Jackson
+    public LogoutRequest() {}
 
     public LogoutRequest(String authToken) {
         this.authToken = authToken;
