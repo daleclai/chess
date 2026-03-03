@@ -1,5 +1,6 @@
 package server.handlers;
 
+import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
@@ -13,6 +14,8 @@ public class CreateGameHandler implements Handler {
 
     private final GameService gameService;
 
+    private final Gson gson = new Gson();
+
     public CreateGameHandler(GameService gameService) {
         this.gameService = gameService;
     }
@@ -20,18 +23,24 @@ public class CreateGameHandler implements Handler {
     @Override
     public void handle(Context ctx) {
         String authToken = ctx.header("Authorization");
-        CreateGameRequest request = ctx.bodyAsClass(CreateGameRequest.class);
 
         try {
-            CreateGameResult result = gameService.createGame(authToken, request);
+            CreateGameRequest request =
+                    gson.fromJson(ctx.body(), CreateGameRequest.class);
+
+            CreateGameResult result =
+                    gameService.createGame(authToken, request);
+
             ctx.status(200);
-            ctx.json(result);
+
+            ctx.result(gson.toJson(result));
+
         } catch (DataAccessException e) {
             ctx.status(401);
-            ctx.json(Map.of("message", e.getMessage()));
+            ctx.result(gson.toJson(Map.of("message", e.getMessage())));
         } catch (Exception e) {
             ctx.status(400);
-            ctx.json(Map.of("message", e.getMessage()));
+            ctx.result(gson.toJson(Map.of("message", "Error: bad request")));
         }
     }
 }
