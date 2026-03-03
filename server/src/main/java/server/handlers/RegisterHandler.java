@@ -27,13 +27,20 @@ public class RegisterHandler implements Handler {
             RegResult result = service.register(request);
 
             ctx.status(200);
-
             ctx.result(gson.toJson(result));
 
         } catch (DataAccessException e) {
-            ctx.status(400);
+
+            if (e.getMessage().contains("already taken")) {
+                ctx.status(403);
+            } else {
+                ctx.status(400);
+            }
+
             ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+
         } catch (Exception e) {
+
             ctx.status(400);
             ctx.result(gson.toJson(Map.of("message", "Error: bad request")));
         }
