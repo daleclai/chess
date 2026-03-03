@@ -22,25 +22,44 @@ public class CreateGameHandler implements Handler {
 
     @Override
     public void handle(Context ctx) {
+
         String authToken = ctx.header("Authorization");
 
         try {
             CreateGameRequest request =
                     gson.fromJson(ctx.body(), CreateGameRequest.class);
 
+            if (request == null || request.getGameName() == null) {
+                ctx.status(400);
+                ctx.result(gson.toJson(
+                        Map.of("message", "Error: bad request")));
+                return;
+            }
+
             CreateGameResult result =
                     gameService.createGame(authToken, request);
 
             ctx.status(200);
-
             ctx.result(gson.toJson(result));
 
         } catch (DataAccessException e) {
-            ctx.status(401);
-            ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+
+            String message = e.getMessage();
+
+            if (message.contains("unauthorized")) {
+                ctx.status(401);
+            } else {
+                ctx.status(400);
+            }
+
+            ctx.result(gson.toJson(
+                    Map.of("message", message)));
+
         } catch (Exception e) {
+
             ctx.status(400);
-            ctx.result(gson.toJson(Map.of("message", "Error: bad request")));
+            ctx.result(gson.toJson(
+                    Map.of("message", "Error: bad request")));
         }
     }
 }

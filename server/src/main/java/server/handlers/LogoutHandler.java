@@ -31,7 +31,7 @@ public class LogoutHandler implements Handler {
 
         } catch (DataAccessException e) {
             ctx.status(401);
-            ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+            ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
         }
     }
 }
