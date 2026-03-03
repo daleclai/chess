@@ -26,6 +26,15 @@ public class JoinGameHandler implements Handler {
             JoinGameRequest request =
                     gson.fromJson(ctx.body(), JoinGameRequest.class);
 
+            if (request == null ||
+                    request.getGameID() <= 0 ||
+                    request.getPlayerColor() == null) {
+
+                ctx.status(400);
+                ctx.result(gson.toJson(Map.of("message", "Error: bad request")));
+                return;
+            }
+
             gameService.joinGame(authToken, request);
 
             ctx.status(200);
@@ -34,8 +43,21 @@ public class JoinGameHandler implements Handler {
                     Map.of("message", "Joined game successfully")));
 
         } catch (DataAccessException e) {
-            ctx.status(401);
-            ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+
+            String message = e.getMessage();
+
+            if (message.contains("unauthorized")) {
+                ctx.status(401);
+            }
+            else if (message.contains("already taken")) {
+                ctx.status(403);
+            }
+            else {
+                ctx.status(400);
+            }
+
+            ctx.result(gson.toJson(Map.of("message", message)));
+
         } catch (Exception e) {
             ctx.status(400);
             ctx.result(gson.toJson(Map.of("message", "Error: bad request")));

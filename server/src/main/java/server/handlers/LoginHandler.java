@@ -6,9 +6,7 @@ import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import service.UserService;
 import service.request.LoginRequest;
-import service.request.RegRequest;
 import service.result.AuthData;
-import service.result.RegResult;
 
 import java.util.Map;
 
@@ -24,18 +22,30 @@ public class LoginHandler implements Handler {
     @Override
     public void handle(Context ctx) {
         try {
-            RegRequest request =
-                    gson.fromJson(ctx.body(), RegRequest.class);
+            LoginRequest request =
+                    gson.fromJson(ctx.body(), LoginRequest.class);
 
-            RegResult result = service.register(request);
+            if (request.getUsername() == null || request.getPassword() == null) {
+                ctx.status(400);
+                ctx.result(gson.toJson(Map.of("message", "Error: bad request")));
+                return;
+            }
+
+            AuthData result = service.login(request);
 
             ctx.status(200);
-
             ctx.result(gson.toJson(result));
 
         } catch (DataAccessException e) {
-            ctx.status(400);
+
+            if (e.getMessage().contains("unauthorized")) {
+                ctx.status(401);
+            } else {
+                ctx.status(400);
+            }
+
             ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+
         } catch (Exception e) {
             ctx.status(400);
             ctx.result(gson.toJson(Map.of("message", "Error: bad request")));
