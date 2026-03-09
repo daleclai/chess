@@ -1,9 +1,9 @@
-package chess.movesCalc;
+package chess.MovesCalc;
 
 import chess.*;
 import java.util.HashSet;
 
-public class pawnCalc {
+public class PawnCalc {
 
     public static HashSet<ChessMove> getMoves(ChessBoard board, ChessPosition currentPosition) {
         HashSet<ChessMove> moves = new HashSet<>();
