@@ -9,8 +9,8 @@ import java.util.HashSet;
 
 public class BishopCalc {
     public static HashSet<ChessMove> getMoves(ChessBoard board, ChessPosition currentPosition) {
-        int current_x = currentPosition.getColumn();
-        int current_y = currentPosition.getRow();
+        int currX = currentPosition.getColumn();
+        int currY = currentPosition.getRow();
         int[][] directions = {
                 {1,1},
                 {-1,1},
@@ -18,7 +18,7 @@ public class BishopCalc {
                 {-1,-1}
         };
         ChessGame.TeamColor pieceColor = board.getPieceTeam(currentPosition);
-        return MovesCalc.makeDirection(board, currentPosition, directions, current_y, current_x, pieceColor);
+        return MovesCalc.makeDirection(board, currentPosition, directions, currY, currX, pieceColor);
     }
 
 }

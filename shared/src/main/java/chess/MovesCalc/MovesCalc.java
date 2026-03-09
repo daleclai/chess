@@ -13,29 +13,29 @@ public class MovesCalc {
         return (position.getRow()>=1 && position.getRow()<=8) && (position.getColumn()>=1 && position.getColumn()<=8);
     }
 
-    static HashSet<ChessMove> makeStaticMoves(ChessPosition currentPosition, int[][] rel_moves, ChessBoard board) {
+    static HashSet<ChessMove> makeStaticMoves(ChessPosition currentPosition, int[][] relMove, ChessBoard board) {
         HashSet<ChessMove> moves=new HashSet<>();
-        int current_x = currentPosition.getColumn();
-        int current_y = currentPosition.getRow();
+        int currX = currentPosition.getColumn();
+        int currY = currentPosition.getRow();
         ChessGame.TeamColor pieceColor = board.getPieceTeam(currentPosition);
 
-        for (int[] rel_move : rel_moves) {
-            ChessPosition possible_pos= new ChessPosition(current_y + rel_move[1], current_x + rel_move[0]);
-            if (!MovesCalc.isValidSquare(possible_pos)) continue;
-            if (board.getPiece(possible_pos) == null || board.getPieceTeam(possible_pos) != pieceColor) {
-                moves.add(new ChessMove(currentPosition, possible_pos, null));
+        for (int[] relMoves : relMove) {
+            ChessPosition possPos= new ChessPosition(currY + relMoves[1], currX + relMoves[0]);
+            if (!MovesCalc.isValidSquare(possPos)) continue;
+            if (board.getPiece(possPos) == null || board.getPieceTeam(possPos) != pieceColor) {
+                moves.add(new ChessMove(currentPosition, possPos, null));
             }
         }
         return moves;
     }
 
-    static HashSet<ChessMove> makeDirection(ChessBoard board, ChessPosition currentPosition, int[][] moveDirections, int current_y, int current_x, ChessGame.TeamColor pieceColor) {
+    static HashSet<ChessMove> makeDirection(ChessBoard board, ChessPosition currentPosition, int[][] moveDirections, int currY, int currX, ChessGame.TeamColor pieceColor) {
         HashSet<ChessMove> moves= new HashSet<>();
         for (int[] direction : moveDirections) {
             boolean obstructed = false;
             int i=1;
             while (!obstructed) {
-                ChessPosition possiblePosition = new ChessPosition(current_y + direction[1]*i, current_x + direction[0]*i);
+                ChessPosition possiblePosition = new ChessPosition(currY + direction[1]*i, currX + direction[0]*i);
                 if (!MovesCalc.isValidSquare(possiblePosition)) {
                     obstructed = true;
                 }

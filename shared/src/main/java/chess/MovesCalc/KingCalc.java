@@ -8,7 +8,7 @@ import java.util.HashSet;
 
 public class KingCalc {
     public static HashSet<ChessMove> getMoves(ChessBoard board, ChessPosition currentPosition) {
-        int[][] rel_Moves = {
+        int[][] relMoves = {
                 {1, 1},
                 {0, 1},
                 {1, 0},
@@ -18,7 +18,7 @@ public class KingCalc {
                 {1, -1},
                 {-1, -1}
         };
-        return MovesCalc.makeStaticMoves(currentPosition, rel_Moves, board);
+        return MovesCalc.makeStaticMoves(currentPosition, relMoves, board);
     }
 
 }
