@@ -1,9 +1,8 @@
 package chess;
-import chess.moves_calc.*;
+import chess.movesCalc.*;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.List;
 
 /**
  * Represents a single chess piece
@@ -59,12 +58,12 @@ public class ChessPiece {
 
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         return switch (type) {
-            case BISHOP -> bishop_calc.getMoves(board, position);
-            case KING -> king_calc.getMoves(board, position);
-            case KNIGHT -> knight_calc.getMoves(board, position);
-            case PAWN -> pawn_calc.getMoves(board, position);
-            case QUEEN -> queen_calc.getMoves(board, position);
-            case ROOK -> rook_calc.getMoves(board, position);
+            case BISHOP -> bishopCalc.getMoves(board, position);
+            case KING -> kingCalc.getMoves(board, position);
+            case KNIGHT -> knightCalc.getMoves(board, position);
+            case PAWN -> pawnCalc.getMoves(board, position);
+            case QUEEN -> queenCalc.getMoves(board, position);
+            case ROOK -> rookCalc.getMoves(board, position);
         };
     }
     @Override

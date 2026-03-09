@@ -1,4 +1,4 @@
-package chess.moves_calc;
+package chess.movesCalc;
 
 import chess.ChessBoard;
 import chess.ChessGame;
@@ -7,7 +7,7 @@ import chess.ChessPosition;
 
 import java.util.HashSet;
 
-public class queen_calc {
+public class queenCalc {
     public static HashSet<ChessMove> getMoves(ChessBoard board, ChessPosition currentPosition) {
         int current_x = currentPosition.getColumn();
         int current_y = currentPosition.getRow();
