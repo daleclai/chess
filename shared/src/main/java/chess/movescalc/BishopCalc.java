@@ -1,4 +1,4 @@
-package chess.MovesCalc;
+package chess.movescalc;
 
 import chess.ChessBoard;
 import chess.ChessGame;
@@ -7,18 +7,18 @@ import chess.ChessPosition;
 
 import java.util.HashSet;
 
-public class RookCalc {
+public class BishopCalc {
     public static HashSet<ChessMove> getMoves(ChessBoard board, ChessPosition currentPosition) {
         int currX = currentPosition.getColumn();
         int currY = currentPosition.getRow();
-        int[][] moveDirections = {
-                {0,1},
-                {1,0},
-                {-1,0},
-                {0,-1}
+        int[][] directions = {
+                {1,1},
+                {-1,1},
+                {1,-1},
+                {-1,-1}
         };
         ChessGame.TeamColor pieceColor = board.getPieceTeam(currentPosition);
-        return MovesCalc.makeDirection(board, currentPosition, moveDirections, currY, currX, pieceColor);
-
+        return MovesCalc.makeDirection(board, currentPosition, directions, currY, currX, pieceColor);
     }
+
 }

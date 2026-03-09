@@ -1,17 +1,14 @@
-package chess.MovesCalc;
+package chess.movescalc;
 
 import chess.ChessBoard;
-import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 
 import java.util.HashSet;
 
-public class QueenCalc {
+public class KingCalc {
     public static HashSet<ChessMove> getMoves(ChessBoard board, ChessPosition currentPosition) {
-        int currX = currentPosition.getColumn();
-        int currY = currentPosition.getRow();
-        int[][] moveDirections = {
+        int[][] relMoves = {
                 {1, 1},
                 {0, 1},
                 {1, 0},
@@ -21,7 +18,7 @@ public class QueenCalc {
                 {1, -1},
                 {-1, -1}
         };
-        ChessGame.TeamColor pieceColor = board.getPieceTeam((currentPosition));
-        return MovesCalc.makeDirection(board, currentPosition, moveDirections, currY, currX, pieceColor);
+        return MovesCalc.makeStaticMoves(currentPosition, relMoves, board);
     }
+
 }
