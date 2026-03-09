@@ -24,6 +24,6 @@ public class RegRequest {
     public static class LoginRequest {
     }
 
-    public static class regRequest {
+    public static class RegisterRequest {
     }
 }

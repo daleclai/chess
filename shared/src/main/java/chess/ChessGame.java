@@ -171,6 +171,23 @@ public class ChessGame {
         return false;
     }
 
+    private boolean hasValidMove(TeamColor teamColor) {
+        for (int y = 1; y <= 8; y++) {
+            for (int x = 1; x <= 8; x++) {
+                ChessPosition pos = new ChessPosition(x, y);
+                ChessPiece piece = board.getPiece(pos);
+
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> moves = validMoves(pos);
+                    if (moves != null && !moves.isEmpty()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Determines if the given team is in checkmate
      *
@@ -181,20 +198,7 @@ public class ChessGame {
         if (!isInCheck(teamColor)) {
             return false;
         }
-
-        for (int y=1; y<=8; y++) {
-            for (int x=1; x<= 8; x++) {
-                ChessPosition pos = new ChessPosition(x,y);
-                ChessPiece piece = board.getPiece(pos);
-                if (piece != null && piece.getTeamColor() == teamColor) {
-                    Collection<ChessMove> moves = validMoves(pos);
-                    if (moves != null && !moves.isEmpty()) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
+        return !hasValidMove(teamColor);
     }
 
     /**
@@ -208,22 +212,8 @@ public class ChessGame {
         if (isInCheck(teamColor)) {
             return false;
         }
-
-        for (int y=1; y<=8; y++) {
-            for (int x=1; x<=8; x++) {
-                ChessPosition pos = new ChessPosition(x,y);
-                ChessPiece piece = board.getPiece(pos);
-                if (piece != null && piece.getTeamColor() == teamColor) {
-                    Collection<ChessMove> moves = validMoves(pos);
-                    if (moves != null && !moves.isEmpty()) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
+        return !hasValidMove(teamColor);
     }
-
     /**
      * Sets this game's chessboard with a given board
      *
