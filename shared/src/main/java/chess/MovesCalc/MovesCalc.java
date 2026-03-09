@@ -21,7 +21,9 @@ public class MovesCalc {
 
         for (int[] relMoves : relMove) {
             ChessPosition possPos= new ChessPosition(currY + relMoves[1], currX + relMoves[0]);
-            if (!MovesCalc.isValidSquare(possPos)) continue;
+            if (!MovesCalc.isValidSquare(possPos)) {
+                continue;
+            }
             if (board.getPiece(possPos) == null || board.getPieceTeam(possPos) != pieceColor) {
                 moves.add(new ChessMove(currentPosition, possPos, null));
             }
@@ -29,7 +31,12 @@ public class MovesCalc {
         return moves;
     }
 
-    static HashSet<ChessMove> makeDirection(ChessBoard board, ChessPosition currentPosition, int[][] moveDirections, int currY, int currX, ChessGame.TeamColor pieceColor) {
+    static HashSet<ChessMove> makeDirection(ChessBoard board,
+                                            ChessPosition currentPosition,
+                                            int[][] moveDirections,
+                                            int currY,
+                                            int currX,
+                                            ChessGame.TeamColor pieceColor) {
         HashSet<ChessMove> moves= new HashSet<>();
         for (int[] direction : moveDirections) {
             boolean obstructed = false;
