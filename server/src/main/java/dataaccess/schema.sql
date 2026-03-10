@@ -1,0 +1,27 @@
+CREATE DATABASE IF NOT EXISTS Chess;
+
+USE Chess;
+
+CREATE  TABLE IF NOT EXISTS 'user' (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    hashed_password VARCHAR(255) NOT NULL,
+    email  VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS `auth` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES `user`(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS `game` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    player1_id INT NOT NULL,
+    player2_id INT NOT NULL,
+    game_state TEXT NOT NULL,
+    FOREIGN KEY (player1_id) REFERENCES `user`(id),
+    FOREIGN KEY (player2_id) REFERENCES `user`(id)
+    );
