@@ -7,6 +7,7 @@ import model.GameData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
+import javax.xml.crypto.Data;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -112,17 +113,44 @@ public class MySqlDataAccess implements DataAccess {
     //authentication
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
-
+        String sql = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
+        try (Connection connect = DatabaseManager.getConnection();
+            PreparedStatement prep = connect.prepareStatement(sql)) {
+            prep.setString(1, auth.token());
+            prep.setString(2, auth.username());
+            prep.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Error: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
-        return null;
+        String sql = "SELECT authToken, user FROM auth WHERE authToken = ?";
+        try (Connection connect = DatabaseManager.getConnection();
+            PreparedStatement prep = connect.prepareStatement(sql)) {
+            prep.setString(1, authToken);
+            try (ResultSet rs = prep.executeQuery()) {
+                if (rs.next()) {
+                    return new AuthData(rs.getString("authToken"), rs.getString("username"));
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
-
+        String sql = "DELETE FROM auth WHERE authToken = ?";
+        try (Connection connect = DatabaseManager.getConnection();
+             PreparedStatement prep = connect.prepareStatement(sql)) {
+            prep.setString(1, authToken);
+            prep.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Error: " + e.getMessage(), e);
+        }
     }
 
 
