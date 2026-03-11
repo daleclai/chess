@@ -1,18 +1,25 @@
 package server;
 
+import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
+import dataaccess.MySqlDataAccess;
 import io.javalin.Javalin;
 import server.handlers.*;
 import service.GameService;
 import service.UserService;
-import dataaccess.MemoryDataAccess;
+
 
 public class Server {
 
     private final Javalin javalin;
-    private final MemoryDataAccess dataAccess;
+    private final DataAccess dataAccess;
 
     public Server() {
-        dataAccess = new MemoryDataAccess();
+        try {
+            dataAccess = new MySqlDataAccess();
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Failed to initialize database", e);
+        }
 
         javalin = Javalin.create(config -> {
             config.staticFiles.add("web");
@@ -31,9 +38,19 @@ public class Server {
         javalin.get("/game", new ListGamesHandler(gameService));
 
         javalin.delete("/db", ctx -> {
-            dataAccess.clear();
-            ctx.status(200);
+            try {
+                dataAccess.clear();
+                ctx.status(200);
+            } catch (DataAccessException e) {
+                ctx.status(500);
+                ctx.result("{\"message\":\"Error: " + e.getMessage() + "\"}");
+            }
         });
+        javalin.exception(DataAccessException.class, (e, ctx) -> {
+            ctx.status(500);
+            ctx.result("{\"message\":\"Error: " + e.getMessage() + "\"}");
+        });
+
     }
 
     public int run(int port) {

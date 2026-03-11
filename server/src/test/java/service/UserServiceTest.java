@@ -2,7 +2,7 @@ package service;
 
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess; // or whatever implementation you use
+import dataaccess.MySqlDataAccess;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.request.LoginRequest;
@@ -16,8 +16,9 @@ public class UserServiceTest {
     private DataAccess dataAccess;
 
     @BeforeEach
-    void setUp() {
-        dataAccess = new MemoryDataAccess(); // use your DAO implementation
+    void setUp() throws DataAccessException {
+        dataAccess = new MySqlDataAccess();
+        dataAccess.clear();
         userService = new UserService(dataAccess);
     }
 

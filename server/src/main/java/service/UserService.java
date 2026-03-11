@@ -8,6 +8,7 @@ import service.request.RegRequest;
 import service.result.AuthData;
 import service.result.LogoutResult;
 import service.result.RegResult;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.UUID;
 
@@ -45,19 +46,15 @@ public class UserService {
     }
 
     public AuthData login(LoginRequest request) throws DataAccessException {
-
         UserData user = dataAccess.getUser(request.getUsername());
-
-        if (user == null ||
-                !user.password().equals(request.getPassword())) {
+        if (user == null || !BCrypt.checkpw(request.getPassword(), user.password())) {
             throw new DataAccessException("Error: unauthorized");
         }
-
         String token = UUID.randomUUID().toString();
         dataAccess.createAuth(new model.AuthData(token, request.getUsername()));
-
         return new AuthData(token, request.getUsername());
     }
+
 
     public LogoutResult logout(String authToken) throws DataAccessException {
         if (authToken == null || dataAccess.getAuth(authToken) == null) {
