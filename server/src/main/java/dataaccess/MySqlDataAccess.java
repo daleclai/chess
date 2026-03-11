@@ -1,6 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -8,6 +9,7 @@ import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.xml.crypto.Data;
+import javax.xml.transform.Result;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -157,21 +159,86 @@ public class MySqlDataAccess implements DataAccess {
     //Games
     @Override
     public int createGame(String gameName) throws DataAccessException {
-        return 0;
+        String sql = "INSERT INTO game (gameName, game_state) VALUES (?, ?)";
+        String json = gson.toJson(new ChessGame());
+        try (Connection connect = DatabaseManager.getConnection();
+             PreparedStatement prep = connect.prepareStatement(sql)) {
+            prep.setString(1, gameName);
+            prep.setString(2, json);
+            prep.executeUpdate();
+            try (ResultSet rs = prep.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error: " + e.getMessage(), e);
+        }
+        throw new DataAccessException("Error: game ID not generated");
     }
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        return null;
+        String sql = "SELECT gameID, whiteUsername, blackUsername, gameName, gameState FROM game WHERE gameID = ?";
+        try (Connection connect = DatabaseManager.getConnection();
+             PreparedStatement prep = connect.prepareStatement(sql)) {
+            prep.setInt(1, gameID);
+            try (ResultSet rs = prep.executeQuery()) {
+                if (rs.next()) {
+                    return readGame(rs);
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error: " + e.getMessage(), e);
+        }
     }
+
 
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
-        return List.of();
+        String sql = "SELECT gameID, whiteUsername, blackUsername, gameName, gameState FROM game";
+        Collection<GameData> games = new ArrayList<>();
+        try (Connection connect = DatabaseManager.getConnection();
+             PreparedStatement prep = connect.prepareStatement(sql);
+             ResultSet rs = prep.executeQuery()) {
+            while (rs.next()) {
+                games.add(readGame(rs));
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error: " + e.getMessage(), e);
+        }
+        return games;
     }
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
+        String sql = """
+             UPDATE game
+             SET whiteUsername = ?, blackUsername = ?, gameName = ?, gameState = ?
+             WHERE gameID = ?
+             """;
+        String json = gson.toJson(game.game());
+        try (Connection connect = DatabaseManager.getConnection();
+             PreparedStatement prep = connect.prepareStatement(sql)) {
+            prep.setString(1, game.whiteUsername());
+            prep.setString(2, game.blackUsername());
+            prep.setString(3, game.gameName());
+            prep.setString(4, json);
+            prep.setInt(5, game.gameID());
+            prep.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Error: " + e.getMessage(), e);
+        }
 
+    }
+
+    private GameData readGame(ResultSet rs) throws SQLException {
+        int id = rs.getInt("gameID");
+        String white = rs.getString("whiteUsername");
+        String black = rs.getString("blackUsername");
+        String name = rs.getString("gameName");
+        ChessGame game = gson.fromJson(rs.getString("gameState"), ChessGame.class);
+        return new GameData(id, white, black, name, game);
     }
 }
