@@ -1,19 +1,16 @@
 package dataaccess;
 
 import chess.ChessGame;
-import chess.ChessPosition;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
-import javax.xml.crypto.Data;
-import javax.xml.transform.Result;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class MySqlDataAccess implements DataAccess {
     private final Gson gson = new Gson();
@@ -128,7 +125,7 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
-        String sql = "SELECT authToken, user FROM auth WHERE authToken = ?";
+        String sql = "SELECT authToken, username FROM auth WHERE authToken = ?";
         try (Connection connect = DatabaseManager.getConnection();
             PreparedStatement prep = connect.prepareStatement(sql)) {
             prep.setString(1, authToken);
@@ -162,7 +159,7 @@ public class MySqlDataAccess implements DataAccess {
         String sql = "INSERT INTO game (gameName, game_state) VALUES (?, ?)";
         String json = gson.toJson(new ChessGame());
         try (Connection connect = DatabaseManager.getConnection();
-             PreparedStatement prep = connect.prepareStatement(sql)) {
+             PreparedStatement prep = connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             prep.setString(1, gameName);
             prep.setString(2, json);
             prep.executeUpdate();
@@ -179,7 +176,7 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        String sql = "SELECT gameID, whiteUsername, blackUsername, gameName, gameState FROM game WHERE gameID = ?";
+        String sql = "SELECT gameID, whiteUsername, blackUsername, gameName, game_state FROM game WHERE gameID = ?";
         try (Connection connect = DatabaseManager.getConnection();
              PreparedStatement prep = connect.prepareStatement(sql)) {
             prep.setInt(1, gameID);
@@ -197,7 +194,7 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
-        String sql = "SELECT gameID, whiteUsername, blackUsername, gameName, gameState FROM game";
+        String sql = "SELECT gameID, whiteUsername, blackUsername, gameName, game_state FROM game";
         Collection<GameData> games = new ArrayList<>();
         try (Connection connect = DatabaseManager.getConnection();
              PreparedStatement prep = connect.prepareStatement(sql);
@@ -215,7 +212,7 @@ public class MySqlDataAccess implements DataAccess {
     public void updateGame(GameData game) throws DataAccessException {
         String sql = """
              UPDATE game
-             SET whiteUsername = ?, blackUsername = ?, gameName = ?, gameState = ?
+             SET whiteUsername = ?, blackUsername = ?, gameName = ?, game_state = ?
              WHERE gameID = ?
              """;
         String json = gson.toJson(game.game());
@@ -238,7 +235,7 @@ public class MySqlDataAccess implements DataAccess {
         String white = rs.getString("whiteUsername");
         String black = rs.getString("blackUsername");
         String name = rs.getString("gameName");
-        ChessGame game = gson.fromJson(rs.getString("gameState"), ChessGame.class);
+        ChessGame game = gson.fromJson(rs.getString("game_state"), ChessGame.class);
         return new GameData(id, white, black, name, game);
     }
 }
