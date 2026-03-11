@@ -19,48 +19,29 @@ public class JoinGameHandler implements Handler {
     }
 
     @Override
-    public void handle(Context ctx) {
+    public void handle(Context ctx) throws DataAccessException {
         String authToken = ctx.header("Authorization");
-
         try {
-            JoinGameRequest request =
-                    gson.fromJson(ctx.body(), JoinGameRequest.class);
-
-            if (request == null ||
-                    request.getGameID() <= 0 ||
-                    request.getPlayerColor() == null) {
-
+            JoinGameRequest request = gson.fromJson(ctx.body(), JoinGameRequest.class);
+            if (request == null || request.getGameID() <= 0 || request.getPlayerColor() == null) {
                 ctx.status(400);
                 ctx.result(gson.toJson(Map.of("message", "Error: bad request")));
                 return;
             }
-
             gameService.joinGame(authToken, request);
-
             ctx.status(200);
-
-            ctx.result(gson.toJson(
-                    Map.of("message", "Joined game successfully")));
-
+            ctx.result(gson.toJson(Map.of("message", "Joined game successfully")));
         } catch (DataAccessException e) {
-
-            String message = e.getMessage();
-
-            if (message.contains("unauthorized")) {
+            if (e.getMessage().contains("unauthorized")) {
                 ctx.status(401);
-            }
-            else if (message.contains("already taken")) {
+            } else if (e.getMessage().contains("already taken")) {
                 ctx.status(403);
-            }
-            else {
+            } else if (e.getMessage().contains("bad request")) {
                 ctx.status(400);
+            } else {
+                throw e;
             }
-
-            ctx.result(gson.toJson(Map.of("message", message)));
-
-        } catch (Exception e) {
-            ctx.status(400);
-            ctx.result(gson.toJson(Map.of("message", "Error: bad request")));
+            ctx.result(gson.toJson(Map.of("message", e.getMessage())));
         }
     }
 }

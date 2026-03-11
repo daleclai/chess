@@ -19,7 +19,7 @@ public class ListGamesHandler implements Handler {
     }
 
     @Override
-    public void handle(Context ctx) {
+    public void handle(Context ctx) throws DataAccessException {
         String authToken = ctx.header("Authorization");
 
         try {
@@ -31,8 +31,13 @@ public class ListGamesHandler implements Handler {
             ctx.result(gson.toJson(result));
 
         } catch (DataAccessException e) {
-            ctx.status(401);
-            ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+            if (e.getMessage().contains("unauthorized")) {
+                ctx.status(401);
+                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+            } else {
+                throw e;
+            }
+
         }
     }
 }

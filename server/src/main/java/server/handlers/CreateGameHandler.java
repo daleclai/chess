@@ -21,45 +21,29 @@ public class CreateGameHandler implements Handler {
     }
 
     @Override
-    public void handle(Context ctx) {
-
+    public void handle(Context ctx) throws DataAccessException {
         String authToken = ctx.header("Authorization");
-
         try {
-            CreateGameRequest request =
-                    gson.fromJson(ctx.body(), CreateGameRequest.class);
-
+            CreateGameRequest request = gson.fromJson(ctx.body(), CreateGameRequest.class);
             if (request == null || request.getGameName() == null) {
                 ctx.status(400);
-                ctx.result(gson.toJson(
-                        Map.of("message", "Error: bad request")));
+                ctx.result(gson.toJson(Map.of("message", "Error: bad request")));
                 return;
             }
-
-            CreateGameResult result =
-                    gameService.createGame(authToken, request);
-
+            CreateGameResult result = gameService.createGame(authToken, request);
             ctx.status(200);
             ctx.result(gson.toJson(result));
-
         } catch (DataAccessException e) {
-
-            String message = e.getMessage();
-
-            if (message.contains("unauthorized")) {
+            if (e.getMessage().contains("unauthorized")) {
                 ctx.status(401);
-            } else {
+            }
+            else if (e.getMessage().contains("bad request")) {
                 ctx.status(400);
             }
-
-            ctx.result(gson.toJson(
-                    Map.of("message", message)));
-
-        } catch (Exception e) {
-
-            ctx.status(400);
-            ctx.result(gson.toJson(
-                    Map.of("message", "Error: bad request")));
+            else {
+                throw e;
+            }
+            ctx.result(gson.toJson(Map.of("message", e.getMessage())));
         }
     }
 }
