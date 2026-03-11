@@ -67,16 +67,49 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
+    //Users
     @Override
     public void createUser(UserData user) throws DataAccessException {
-
+        String sql = "INSERT INTO user (username, hashed_password, email) VALUES (?, ?, ?)";
+        String hashed = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+        try (Connection connect = DatabaseManager.getConnection();
+            PreparedStatement prep = connect.prepareStatement(sql)) {
+            prep.setString(1, user.username());
+            prep.setString(2, hashed);
+            prep.setString(3, user.email());
+            prep.executeUpdate();
+        } catch (SQLException e) {
+            if (e.getMessage().contains("Duplicate entry")) {
+                throw new DataAccessException("Error: already taken");
+            }
+            throw new DataAccessException("Error: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
-        return null;
+        String sql = "SELECT username, hashed_password, email FROM user WHERE username = ?";
+        try (Connection connect = DatabaseManager.getConnection();
+             PreparedStatement prep = connect.prepareStatement(sql)) {
+            prep.setString(1, username);
+            try (ResultSet rs = prep.executeQuery()) {
+                if (rs.next()) {
+                    return new UserData(
+                            rs.getString("username"),
+                            rs.getString("hashed_password"),
+                            rs.getString("email")
+                    );
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error: " + e.getMessage(), e);
+        }
+
     }
 
+
+    //authentication
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
 
@@ -92,6 +125,8 @@ public class MySqlDataAccess implements DataAccess {
 
     }
 
+
+    //Games
     @Override
     public int createGame(String gameName) throws DataAccessException {
         return 0;
@@ -111,7 +146,4 @@ public class MySqlDataAccess implements DataAccess {
     public void updateGame(GameData game) throws DataAccessException {
 
     }
-
-    //Users
-    @Override
 }
