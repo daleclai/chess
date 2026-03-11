@@ -30,13 +30,13 @@ public class LogoutHandler implements Handler {
             ctx.result(gson.toJson(result));
 
         } catch (DataAccessException e) {
-            if (e.getMessage().contains("unauthorized")) {
+            if (e.getMessage().contains("unauthorized") ||
+                    e.getMessage().contains("nvalid")) {
                 ctx.status(401);
-                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
             } else {
                 throw e;
             }
-
         }
     }
 }
