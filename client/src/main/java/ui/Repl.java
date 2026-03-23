@@ -28,7 +28,7 @@ public class Repl {
             if (state == State.PRELOGIN) {
                 preloginClient.eval(line);
             } else if (state == State.POSTLOGIN) {
-                preloginClient.getPostloginClient().eval();
+                preloginClient.getPostloginClient().eval(line);
             }
         }
 
