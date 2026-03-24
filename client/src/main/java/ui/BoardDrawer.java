@@ -32,14 +32,15 @@ public class BoardDrawer {
                 ChessPiece piece = board.getPiece(position);
                 System.out.print(bg + getPieceString(piece) + reset);
             }
-            System.out.print(border + "  ");
+            System.out.println(border + " " + (row + 1) + " " + reset);
 
         }
-            for (int c = 0; c < 8; c++) {
-                int col = white ? c : 7 - c;
-                System.out.print(labels[col]);
-            }
-            System.out.println("  " + reset);
+        System.out.print(border + "  ");
+        for (int c = 0; c < 8; c++) {
+            int col = white ? c : 7 - c;
+            System.out.print(labels[col]);
+        }
+        System.out.println("  " + reset);
         }
 
 
