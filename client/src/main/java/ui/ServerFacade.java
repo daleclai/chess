@@ -79,7 +79,9 @@ public class ServerFacade {
             throw new Exception("HTTP error: " + http.getResponseCode());
         }
 
-        if (responseClass == null) return null;
+        if (responseClass == null) {
+            return null;
+        }
 
         try (var is = http.getInputStream()) {
             return gson.fromJson(new String(is.readAllBytes()), responseClass);

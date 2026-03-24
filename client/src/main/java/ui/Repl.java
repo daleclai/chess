@@ -23,7 +23,9 @@ public class Repl {
         while (state != State.QUIT) {
             printPrompt();
             String line = scanner.nextLine().trim();
-            if (line.isEmpty()) continue;
+            if (line.isEmpty()) {
+                continue;
+            }
 
             if (state == State.PRELOGIN) {
                 preloginClient.eval(line);
