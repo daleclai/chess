@@ -7,6 +7,7 @@ import io.javalin.Javalin;
 import server.handlers.*;
 import service.GameService;
 import service.UserService;
+import server.websocket.WSHandler;
 
 
 public class Server {
@@ -27,7 +28,7 @@ public class Server {
 
         UserService userService = new UserService(dataAccess);
         GameService gameService = new GameService(dataAccess);
-
+        WSHandler wsHandler = new WSHandler(dataAccess);
 
         javalin.post("/user", new RegisterHandler(userService));
         javalin.post("/session", new LoginHandler(userService));
@@ -37,6 +38,7 @@ public class Server {
         javalin.put("/game", new JoinGameHandler(gameService));
         javalin.get("/game", new ListGamesHandler(gameService));
 
+        javalin.ws("/ws", wsHandler);
         javalin.delete("/db", ctx -> {
             try {
                 dataAccess.clear();
