@@ -12,7 +12,7 @@ import websocket.messages.*;
 
 import java.io.IOException;
 
-public class WSHandler extends WsConfig {
+public class WSHandler {
 
     private final DataAccess dataAccess;
     private final ConnectionManager connections = new ConnectionManager();
@@ -22,7 +22,6 @@ public class WSHandler extends WsConfig {
         this.dataAccess = dataAccess;
     }
 
-    @Override
     public void init(WsConfig ws) {
         ws.onConnect(this::onConnect);
         ws.onMessage(this::onMessage);
@@ -38,7 +37,7 @@ public class WSHandler extends WsConfig {
     }
 
     private void onClose(WsCloseContext ctx) {
-        connections.remove(ctx.session());
+        connections.remove(ctx.session);
     }
 
     private void onMessage(WsMessageContext ctx) {
@@ -47,7 +46,7 @@ public class WSHandler extends WsConfig {
             switch (command.getCommandType()) {
                 case CONNECT -> handleConnect(ctx, command);
                 case MAKE_MOVE -> {
-                    MoveCommand moveCommand = gson.fromJson(ctx.message(), MakeMoveCommand.class);
+                    MoveCommand moveCommand = gson.fromJson(ctx.message(), MoveCommand.class);
                     handleMakeMove(ctx, moveCommand);
                 }
                 case LEAVE -> handleLeave(ctx, command);
@@ -73,11 +72,11 @@ public class WSHandler extends WsConfig {
             return;
         }
 
-        connections.add(command.getGameID(), ctx.session());
+        connections.add(command.getGameID(), ctx.session);
 
         //send load game to client
         String loadMsg = gson.toJson(new LoadGame(game));
-        connections.sendToRoot(ctx.session(), loadMsg);
+        connections.sendToRoot(ctx.session, loadMsg);
 
         String username = auth.username();
         String role;
@@ -86,7 +85,7 @@ public class WSHandler extends WsConfig {
         } else if (username.equals(game.blackUsername())) {
             role = username + " joined as BLACK";
         } else {
-            role = username = " joined as observer";
+            role = username + " joined as observer";
         }
         String notifyMsg = gson.toJson(new Notification(role));
         connections.broadcast(command.getGameID(), ctx.session, notifyMsg);
@@ -103,6 +102,7 @@ public class WSHandler extends WsConfig {
         GameData gameData = dataAccess.getGame(command.getGameID());
         if (gameData == null) {
             sendError(ctx, "Error: game not found");
+            return;
         }
         ChessGame game = gameData.game();
 
@@ -153,6 +153,8 @@ public class WSHandler extends WsConfig {
                 game
         );
         dataAccess.updateGame(updated);
+        String loadMsg = gson.toJson(new LoadGame(updated));
+        connections.broadcastToAll(command.getGameID(), loadMsg);
 
         //broadcast to everyone
         String moveDesc = move.getStartPosition().toString() + " to " + move.getEndPosition().toString();
@@ -170,26 +172,19 @@ public class WSHandler extends WsConfig {
         } else if (game.isInStalemate(opp)) {
             String msg = gson.toJson(new Notification("Stalemate! Game over."));
             connections.broadcastToAll(command.getGameID(), msg);
-        } else {
-            String msg = gson.toJson(new Notification(oppName + " is in check! Game over."));
+        } else if (game.isInCheck(opp)){
+            String msg = gson.toJson(new Notification(oppName + " is in check!"));
             connections.broadcastToAll(command.getGameID(), msg);
         }
 
     }
 
     private void handleLeave(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException {
-        AuthData auth = dataAccess.getAuth(command.getAuthToken());
-        if (auth == null) {
-            sendError(ctx, "Error: unauthorized");
-            return;
-        }
+        GameContext gc = validate(ctx, command);
+        if (gc == null) return;
 
-        GameData data = dataAccess.getGame(command.getGameID());
-        if (data == null) {
-            sendError(ctx, "Error: game not found");
-            return;
-        }
-        String username = auth.username();
+        String username = gc.auth().username();
+        GameData data = gc.gameData();
 
         if (username.equals(data.whiteUsername())) {
             GameData updated = new GameData(data.gameID(), null,
@@ -200,11 +195,60 @@ public class WSHandler extends WsConfig {
                     null, data.gameName(), data.game());
             dataAccess.updateGame(updated);
         }
+        String notifyMsg = gson.toJson(new Notification(username + " left the game"));
+        connections.broadcast(command.getGameID(), ctx.session, notifyMsg);
+        connections.remove(ctx.session);
+
+    }
+
+    private void handleResign(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException {
+        GameContext gc = validate(ctx, command);
+        if (gc == null) return;
+
+        String username = gc.auth().username();
+        GameData gameData = gc.gameData();
+
+        if (!username.equals(gameData.whiteUsername()) &&
+        !username.equals(gameData.blackUsername())) {
+            sendError(ctx, "Error: observers cannot resign");
+            return;
+        }
+
+        ChessGame game = gameData.game();
+        game.setTeamTurn(null);
+        GameData updated = new GameData(
+                gameData.gameID(),
+                gameData.whiteUsername(),
+                gameData.blackUsername(),
+                gameData.gameName(),
+                game);
+        dataAccess.updateGame(updated);
+
+        String notifyMsg = gson.toJson(new Notification(username + " resigned. Game over."));
+        connections.broadcastToAll(command.getGameID(), notifyMsg);
+    }
+
+    //helper
+
+    private record GameContext(AuthData auth, GameData gameData) {}
+
+    private GameContext validate(WsMessageContext ctx, UserGameCommand command) throws DataAccessException {
+        AuthData auth = dataAccess.getAuth(command.getAuthToken());
+        if (auth == null) {
+            sendError(ctx, "Error: unauthorized");
+            return null;
+        }
+        GameData gameData = dataAccess.getGame(command.getGameID());
+        if (gameData == null) {
+            sendError(ctx, "Error: game not found");
+            return null;
+        }
+        return new GameContext(auth, gameData);
     }
 
     private void sendError(WsMessageContext ctx, String s) {
         try {
-            connections.sendToRoot(ctx.session(), gson.toJson(new ErrorMessage(message)));
+            connections.sendToRoot(ctx.session, gson.toJson(new ErrorMessage(s)));
         } catch (IOException e) {
             System.err.println("Failed to send error: " + e.getMessage());
         }
