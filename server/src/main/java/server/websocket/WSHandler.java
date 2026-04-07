@@ -1,6 +1,8 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.websocket.*;
@@ -132,8 +134,79 @@ public class WSHandler extends WsConfig {
             sendError(ctx, "Error: it is not your turn");
             return;
         }
+
+        //movements
+        ChessMove move = command.getMove();
+        try {
+            game.makeMove(move);
+        } catch (InvalidMoveException e) {
+            sendError(ctx, "Error: invalid move");
+            return;
+        }
+
+        //save game
+        GameData updated = new GameData(
+                gameData.gameID(),
+                gameData.whiteUsername(),
+                gameData.blackUsername(),
+                gameData.gameName(),
+                game
+        );
+        dataAccess.updateGame(updated);
+
+        //broadcast to everyone
+        String moveDesc = move.getStartPosition().toString() + " to " + move.getEndPosition().toString();
+        String notifyMsg = gson.toJson(new Notification(username + " moved " + moveDesc));
+        connections.broadcast(command.getGameID(), ctx.session, notifyMsg);
+
+        ChessGame.TeamColor opp = (playerColor == ChessGame.TeamColor.WHITE)
+                ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+        String oppName = (opp == ChessGame.TeamColor.WHITE)
+                ? gameData.whiteUsername() : gameData.blackUsername();
+
+        if (game.isInCheckmate(opp)) {
+            String msg = gson.toJson(new Notification(oppName + " is in Checkmate! Game Over."));
+            connections.broadcastToAll(command.getGameID(), msg);
+        } else if (game.isInStalemate(opp)) {
+            String msg = gson.toJson(new Notification("Stalemate! Game over."));
+            connections.broadcastToAll(command.getGameID(), msg);
+        } else {
+            String msg = gson.toJson(new Notification(oppName + " is in check! Game over."));
+            connections.broadcastToAll(command.getGameID(), msg);
+        }
+
+    }
+
+    private void handleLeave(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException {
+        AuthData auth = dataAccess.getAuth(command.getAuthToken());
+        if (auth == null) {
+            sendError(ctx, "Error: unauthorized");
+            return;
+        }
+
+        GameData data = dataAccess.getGame(command.getGameID());
+        if (data == null) {
+            sendError(ctx, "Error: game not found");
+            return;
+        }
+        String username = auth.username();
+
+        if (username.equals(data.whiteUsername())) {
+            GameData updated = new GameData(data.gameID(), null,
+                    data.blackUsername(), data.gameName(), data.game());
+            dataAccess.updateGame(updated);
+        } else if (username.equals(data.blackUsername())) {
+            GameData updated = new GameData(data.gameID(), data.whiteUsername(),
+                    null, data.gameName(), data.game());
+            dataAccess.updateGame(updated);
+        }
     }
 
     private void sendError(WsMessageContext ctx, String s) {
+        try {
+            connections.sendToRoot(ctx.session(), gson.toJson(new ErrorMessage(message)));
+        } catch (IOException e) {
+            System.err.println("Failed to send error: " + e.getMessage());
+        }
     }
 }
