@@ -106,6 +106,11 @@ public class WSHandler {
         }
         ChessGame game = gameData.game();
 
+        if (game.getTeamTurn() == null) {
+            sendError(ctx, "Error: game is already over");
+            return;
+        }
+
         //check if player is in checkmate or stalemate
 
         if (
@@ -215,6 +220,12 @@ public class WSHandler {
         }
 
         ChessGame game = gameData.game();
+
+        if (game.getTeamTurn()==null) {
+            sendError(ctx, "Error: game is already over");
+            return;
+        }
+
         game.setTeamTurn(null);
         GameData updated = new GameData(
                 gameData.gameID(),

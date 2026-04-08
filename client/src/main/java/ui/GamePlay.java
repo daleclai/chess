@@ -44,7 +44,7 @@ public class GamePlay implements ServerMessageObserver {
             }
             case NOTIFICATION -> {
                 Notification notification = gson.fromJson(gson.toJson(message), Notification.class);
-                System.out.println("\n" + notification.getNotify());
+                System.out.println("\n" + notification.getMessage());
                 printPrompt();
             }
             case ERROR -> {
