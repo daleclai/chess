@@ -2,6 +2,8 @@ package ui;
 
 import chess.*;
 
+import java.util.Collection;
+
 import static ui.EscapeSequences.*;
 
 public class BoardDrawer {
@@ -58,5 +60,8 @@ public class BoardDrawer {
             case ROOK -> isWhite ? WHITE_ROOK  : BLACK_ROOK;
             case PAWN -> isWhite ? WHITE_PAWN  : BLACK_PAWN;
         };
+    }
+
+    public static void drawHighlighted(ChessBoard board, ChessGame.TeamColor perspective, ChessPosition position, Collection<ChessMove> moves) {
     }
 }

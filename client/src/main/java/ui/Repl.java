@@ -41,7 +41,7 @@ public class Repl {
         this.state = state;
     }
 
-    private void printPrompt() {
+    void printPrompt() {
         String label = state == State.PRELOGIN ? "[LOGGED OUT]" : "[LOGGED IN]";
         System.out.print("\n" + label + " >>> ");
     }
