@@ -38,7 +38,7 @@ public class Server {
         javalin.put("/game", new JoinGameHandler(gameService));
         javalin.get("/game", new ListGamesHandler(gameService));
 
-        javalin.ws("/ws", wsHandler);
+        javalin.ws("/ws", wsHandler::init);
         javalin.delete("/db", ctx -> {
             try {
                 dataAccess.clear();

@@ -3,6 +3,8 @@ package ui;
 import chess.*;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static ui.EscapeSequences.*;
 
@@ -62,6 +64,57 @@ public class BoardDrawer {
         };
     }
 
-    public static void drawHighlighted(ChessBoard board, ChessGame.TeamColor perspective, ChessPosition position, Collection<ChessMove> moves) {
+    public static void drawHighlighted(ChessBoard board,
+                                       ChessGame.TeamColor perspective,
+                                       ChessPosition position,
+                                       Collection<ChessMove> moves) {
+        boolean white = perspective == ChessGame.TeamColor.WHITE;
+        String[] labels = {" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h ", };
+        String border = SET_BG_COLOR_DARK_GREY + SET_TEXT_COLOR_WHITE + SET_TEXT_BOLD;
+        String reset = RESET_BG_COLOR + RESET_TEXT_COLOR + RESET_TEXT_BOLD_FAINT;
+
+        Set<ChessPosition> highlighted = new HashSet<>();
+        if (moves != null) {
+            for (ChessMove move : moves) {
+                highlighted.add(move.getEndPosition());
+            }
+        }
+
+        System.out.print(border + "  ");
+        for (int c=0; c<8; c++) {
+            int col = white ? c : 7 - c;
+            System.out.print(labels[col]);
+        }
+        System.out.println("  " + reset);
+
+        for (int r = 0; r<8; r++) {
+            int row = white ? 7 - r : r;
+            System.out.print(border + " " + (row + 1) + " " + reset);
+
+            for (int c=0; c<8; c++) {
+                int col = white ? c : 7-c;
+                ChessPosition position1 = new ChessPosition(row+1, col+1);
+                boolean selected = position1.equals(position);
+                boolean highlight = highlighted.contains(position1);
+                boolean lightSquare = (row + col) % 2 !=0;
+                String background;
+                if (selected) {
+                    background = SET_BG_COLOR_YELLOW;
+                } else if (highlight) {
+                    background = SET_BG_COLOR_DARK_GREEN;
+                } else {
+                    background = lightSquare ? SET_BG_COLOR_WHITE : SET_BG_COLOR_GREEN;
+                }
+                ChessPiece piece = board.getPiece(position1);
+                System.out.print(background + getPieceString(piece) + reset);
+            }
+            System.out.println(border + " " + (row + 1) + " " + reset);
+        }
+        System.out.print(border + "  ");
+        for (int c=0; c<8;c++) {
+            int col = white ? c : 7-c;
+            System.out.print(labels[col]);
+        }
+        System.out.println("  " + reset);
     }
 }
