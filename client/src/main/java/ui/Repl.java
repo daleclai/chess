@@ -6,9 +6,10 @@ import java.util.Scanner;
 public class Repl {
     private final PreloginClient preloginClient;
     private State state = State.PRELOGIN;
+    private GamePlay gamePlay;
 
     public enum State {
-        PRELOGIN, POSTLOGIN, QUIT
+        PRELOGIN, POSTLOGIN, GAMEPLAY, QUIT
     }
 
     public Repl(int port) {
@@ -31,6 +32,8 @@ public class Repl {
                 preloginClient.eval(line);
             } else if (state == State.POSTLOGIN) {
                 preloginClient.getPostloginClient().eval(line);
+            } else if (state == State.GAMEPLAY) {
+                gamePlay.eval(line);
             }
         }
 
@@ -41,8 +44,18 @@ public class Repl {
         this.state = state;
     }
 
+    public void setGamePlay(GamePlay client) {
+        this.gamePlay = client;
+    }
+
     void printPrompt() {
-        String label = state == State.PRELOGIN ? "[LOGGED OUT]" : "[LOGGED IN]";
+        String label = switch (state) {
+            case PRELOGIN -> "[LOGGED OUT]";
+            case POSTLOGIN -> "[LOGGED IN]";
+            case GAMEPLAY -> "[IN GAME]";
+            default -> "";
+        };
+
         System.out.print("\n" + label + " >>> ");
     }
 }

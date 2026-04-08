@@ -102,9 +102,9 @@ public class PostloginClient {
                 ? ChessGame.TeamColor.WHITE
                 : ChessGame.TeamColor.BLACK;
 
-        ChessBoard board = new ChessBoard();
-        board.resetBoard();
-        BoardDrawer.draw(board, perspective);
+        GamePlay gamePlay = new GamePlay(facade.getPort(), authToken, gameID, perspective, repl);
+        repl.setGamePlay(gamePlay);
+        repl.setState(Repl.State.GAMEPLAY);
     }
 
     private void observeGame(String[] params) throws Exception {
@@ -126,9 +126,10 @@ public class PostloginClient {
             return;
         }
 
-        ChessBoard board = new ChessBoard();
-        board.resetBoard();
-        BoardDrawer.draw(board, ChessGame.TeamColor.WHITE);
+        int gameID = ((Double) lastGameList.get(index).get("gameID")).intValue();
+        GamePlay gameplay = new GamePlay(facade.getPort(), authToken, gameID, null, repl);
+        repl.setGamePlay(gameplay);
+        repl.setState(Repl.State.GAMEPLAY);
     }
 
     private void printHelp() {

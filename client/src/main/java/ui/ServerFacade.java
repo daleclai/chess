@@ -91,4 +91,8 @@ public class ServerFacade {
     public void clear() throws Exception{
         makeRequest("DELETE", "/db", null, null);
     }
+
+    public int getPort() {
+        return Integer.parseInt(serverUrl.replace("http://localhost:", ""));
+    }
 }
