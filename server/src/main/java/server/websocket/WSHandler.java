@@ -106,7 +106,7 @@ public class WSHandler {
         }
         ChessGame game = gameData.game();
 
-        if (game.getTeamTurn() == null) {
+        if (game.isGameOver()) {
             sendError(ctx, "Error: game is already over");
             return;
         }
@@ -225,12 +225,12 @@ public class WSHandler {
 
         ChessGame game = gameData.game();
 
-        if (game.getTeamTurn()==null) {
+        if (game.isGameOver()) {
             sendError(ctx, "Error: game is already over");
             return;
         }
 
-        game.setTeamTurn(null);
+        game.setGameOver(true);
         GameData updated = new GameData(
                 gameData.gameID(),
                 gameData.whiteUsername(),

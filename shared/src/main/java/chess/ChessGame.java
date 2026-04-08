@@ -232,6 +232,15 @@ public class ChessGame {
         return board;
     }
 
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
