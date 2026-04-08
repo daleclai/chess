@@ -134,10 +134,14 @@ public class GamePlay implements ServerMessageObserver {
     }
 
     private ChessMove parseMove(String input) {
-        if (input.length() < 4) return null;
+        if (input.length() < 4) {
+            return null;
+        }
         ChessPosition start = parsePosition(input.substring(0, 2));
         ChessPosition end = parsePosition(input.substring(2, 4));
-        if (start == null || end == null) return null;
+        if (start == null || end == null) {
+            return null;
+        }
 
         ChessPiece.PieceType promotion = null;
         if (input.length() == 5) {
@@ -153,7 +157,9 @@ public class GamePlay implements ServerMessageObserver {
     }
 
     private ChessPosition parsePosition(String input) {
-        if (input.length() < 2) return null;
+        if (input.length() < 2) {
+            return null;
+        }
         int col = input.charAt(0) - 'a' + 1;
         int row;
         try {
@@ -161,7 +167,9 @@ public class GamePlay implements ServerMessageObserver {
         } catch (NumberFormatException e) {
             return null;
         }
-        if (col < 1 || col > 8 || row < 1 || row > 8) return null;
+        if (col < 1 || col > 8 || row < 1 || row > 8) {
+            return null;
+        }
         return new ChessPosition(row, col);
     }
 

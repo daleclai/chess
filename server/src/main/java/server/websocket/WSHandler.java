@@ -186,7 +186,9 @@ public class WSHandler {
 
     private void handleLeave(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException {
         GameContext gc = validate(ctx, command);
-        if (gc == null) return;
+        if (gc == null) {
+            return;
+        }
 
         String username = gc.auth().username();
         GameData data = gc.gameData();
@@ -208,7 +210,9 @@ public class WSHandler {
 
     private void handleResign(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException {
         GameContext gc = validate(ctx, command);
-        if (gc == null) return;
+        if (gc == null) {
+            return;
+        }
 
         String username = gc.auth().username();
         GameData gameData = gc.gameData();
