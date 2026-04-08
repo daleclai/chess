@@ -1,11 +1,12 @@
 package ui;
 
 import com.google.gson.Gson;
+import jakarta.websocket.*;
+import jakarta.websocket.WebSocketContainer;
 import websocket.commands.MoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
-import javax.websocket.*;
 import java.net.URI;
 
 @ClientEndpoint
